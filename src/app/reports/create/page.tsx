@@ -7,6 +7,7 @@ import Protected from "@/app/components/Protected";
 import CategorySelect from "@/app/components/CategorySelect";
 import { useAuth } from "@/app/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
+import LocationPicker from "@/app/components/LocationPicker";
 
 export default function CreateReportPageWrapper() {
   // wrap with Protected so only authenticated users can access
@@ -109,29 +110,7 @@ function CreateReportPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Longitude</label>
-            <input
-              value={lng}
-              onChange={(e) => setLng(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="77.58"
-              inputMode="decimal"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Latitude</label>
-            <input
-              value={lat}
-              onChange={(e) => setLat(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="12.97"
-              inputMode="decimal"
-              required
-            />
-          </div>
+          <LocationPicker value={coords} onChange={setCoords} />
         </div>
 
         <div>

@@ -1,113 +1,120 @@
 // src/app/components/ReportCard.tsx
 "use client";
-
 import React, { useState } from "react";
-import { format } from "date-fns";
-import { apiFetch } from "@/lib/api"; // adjust path if needed
-import DeleteModal from "./DeleteModal";
-import { FaTrashAlt } from "react-icons/fa";
-
-type Report = {
-  _id: string;
-  title: string;
-  description?: string;
-  photos?: any[]; // might be string[] or object[]
-  createdAt: string;
-  reporterId?: string;
-};
+import Link from "next/link";
+import ImageModal from "./ImageModal";
+import Avatar from "./Avatar";
+import { FaTrashAlt, FaCommentAlt } from "react-icons/fa";
+import { useAuth } from "./AuthProvider";
 
 export default function ReportCard({
   report,
-  onDeleted,
+  onDelete,
 }: {
-  report: Report;
-  onDeleted?: (id: string) => void;
+  report: any;
+  onDelete?: (id: string) => void;
 }) {
-  const [deleting, setDeleting] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [imgErrored, setImgErrored] = useState(false);
-
-  const rawPhoto = report.photos?.[0];
-  const imgKey = (() => {
-    if (!rawPhoto) return null;
-    if (typeof rawPhoto === "string") return rawPhoto; // if stored as string
-    if (rawPhoto.key) return String(rawPhoto.key); // prefer key
-    if (rawPhoto._id) return String(rawPhoto._id);
-    if (rawPhoto.id) return String(rawPhoto.id);
-    if (rawPhoto.filename) return String(rawPhoto.filename);
-    return null;
-  })();
-  const apiBase = (process.env.NEXT_PUBLIC_API_BASE || "") as string;
-  const photoUrl = imgKey
-    ? `${apiBase}/api/v1/reports/download/${encodeURIComponent(imgKey)}`
+  const [open, setOpen] = useState<string | null>(null);
+  const photo = report.photos?.[0];
+  const key = photo?.key || photo?._id || photo?.filename || null;
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "";
+  const imgUrl = key
+    ? `${apiBase}/api/v1/reports/download/${encodeURIComponent(key)}`
     : null;
 
-  async function handleConfirmDelete() {
-    setDeleting(true);
-    try {
-      const res = await apiFetch(`/api/v1/reports/${report._id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        alert(body?.error || `Delete failed: ${res.status}`);
-      } else {
-        onDeleted?.(report._id);
-      }
-    } catch (err: any) {
-      alert(err.message || "Network error");
-    } finally {
-      setDeleting(false);
-      setModalOpen(false);
-    }
-  }
+  const { user } = useAuth();
+  const canDelete =
+    user && (user.sub === report.reporterId || user.role === "admin");
 
   return (
-    <article className="bg-white rounded-xl shadow p-4 flex gap-4 items-start">
-      {photoUrl && !imgErrored ? (
-        <img
-          src={photoUrl}
-          alt="photo"
-          className="w-32 h-32 object-cover rounded"
-          onError={() => setImgErrored(true)}
-        />
-      ) : (
-        <div className="w-32 h-32 bg-gray-100 rounded flex items-center justify-center text-sm text-gray-400">
-          no photo
-        </div>
-      )}
-
-      <div className="flex-1">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-semibold text-lg">{report.title}</h3>
-            <p className="text-sm text-gray-500">
-              {format(new Date(report.createdAt), "PPpp")}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              title="Delete"
-              onClick={() => setModalOpen(true)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <FaTrashAlt />
-            </button>
-          </div>
+    <>
+      <article className="bg-white rounded-lg shadow-sm overflow-hidden flex gap-4 p-4 items-start hover:shadow-md transition">
+        {/* thumbnail */}
+        <div className="w-28 h-28 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+          {imgUrl ? (
+            <img
+              src={imgUrl}
+              alt={report.title}
+              className="w-full h-full object-cover cursor-pointer"
+              onClick={() => setOpen(imgUrl)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No image
+            </div>
+          )}
         </div>
 
-        <p className="mt-2 text-gray-700">{report.description}</p>
-      </div>
+        {/* content */}
+        <div className="flex-1">
+          <div className="flex items-start justify-between">
+            <div>
+              <Link
+                href={`/reports/${report._id}`}
+                className="text-lg font-semibold hover:underline"
+              >
+                {report.title}
+              </Link>
+              {/* date (not a link, no underline) */}
+              <div className="text-sm text-gray-500 mt-1">
+                {new Date(report.createdAt).toLocaleString()}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* avatar small */}
+              <Avatar
+                src={report.reporterAvatar}
+                name={report.reporterName}
+                size={36}
+                className="ring-1 ring-white"
+              />
+              {canDelete && (
+                <button
+                  onClick={() => onDelete?.(report._id)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <FaTrashAlt />
+                </button>
+              )}
+            </div>
+          </div>
 
-      <DeleteModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onConfirm={handleConfirmDelete}
-        loading={deleting}
-        title="Delete report"
-        description="Are you sure you want to delete this report? This cannot be undone."
-      />
-    </article>
+          {/* description — no underline, truncated */}
+          <p className="text-sm text-gray-700 mt-3 line-clamp-2">
+            {report.description}
+          </p>
+
+          {/* chips */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {Array.isArray(report.categories) &&
+              report.categories.map((c: string) => (
+                <span
+                  key={c}
+                  className="inline-block text-xs px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100"
+                >
+                  {formatCategoryTitle(c)}
+                </span>
+              ))}
+          </div>
+
+          {/* footer: comment count, etc */}
+          <div className="mt-3 flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <FaCommentAlt className="text-gray-500" />
+              <span>{report.commentsCount ?? 0}</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <ImageModal url={open} onClose={() => setOpen(null)} />
+    </>
   );
+}
+
+function formatCategoryTitle(raw: string) {
+  if (!raw) return raw;
+  const replaced = raw.replace(/[-_]/g, " ");
+  const words = replaced.match(/[A-Za-z0-9]+/g) || [];
+  return words.map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
 }

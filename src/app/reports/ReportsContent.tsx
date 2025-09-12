@@ -15,7 +15,15 @@ export default function ReportsPage() {
   const [catFilter, setCatFilter] = useState<string | "">("");
   const [loadingList, setLoadingList] = useState(false);
   const [meta, setMeta] = useState<any>(null);
-
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  // auto refresh
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const id = setInterval(() => {
+      load();
+    }, 60000); // 1 minute
+    return () => clearInterval(id);
+  }, [autoRefresh, page, limit, sort, catFilter]);
   useEffect(() => {
     if (!loading) load();
   }, [loading, page, limit, sort, catFilter]);
@@ -45,7 +53,22 @@ export default function ReportsPage() {
     <main className="max-w-6xl mx-auto p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Reports</h1>
+
         <div className="flex gap-3 items-center">
+          <button
+            onClick={() => load()}
+            className="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200"
+          >
+            Refresh
+          </button>
+          <label className="text-sm flex items-center gap-1">
+            <input
+              type="checkbox"
+              checked={autoRefresh}
+              onChange={(e) => setAutoRefresh(e.target.checked)}
+            />
+            Auto-refresh
+          </label>
           <select
             value={sort}
             onChange={(e) => {

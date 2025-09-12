@@ -2,38 +2,51 @@
 "use client";
 import React from "react";
 
+type Props = {
+  open: boolean;
+  title?: string;
+  message?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+};
+
 export default function DeleteModal({
   open,
-  onClose,
+  title = "Confirm",
+  message = "Are you sure?",
+  confirmLabel = "Delete",
+  cancelLabel = "Cancel",
+  onCancel,
   onConfirm,
-  loading = false,
-  title = "Confirm delete",
-  description = "This action cannot be undone.",
-}: {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  loading?: boolean;
-  title?: string;
-  description?: string;
-}) {
+}: Props) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="bg-white max-w-md w-full rounded p-6 z-10">
+    <div
+      className="fixed inset-0 z-[99999] flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="absolute inset-0 bg-black/50" onClick={onCancel} />
+      <div
+        className="relative z-[100000] bg-white rounded-lg shadow-lg max-w-sm w-full p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 mb-4">{description}</p>
+        <p className="text-sm text-gray-600 mb-4">{message}</p>
         <div className="flex justify-end gap-3">
-          <button onClick={onClose} className="px-3 py-1 border rounded">
-            Cancel
+          <button
+            onClick={onCancel}
+            className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
+          >
+            {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            disabled={loading}
-            className="px-3 py-1 bg-red-600 text-white rounded disabled:opacity-60"
+            className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700"
           >
-            {loading ? "Deleting..." : "Delete"}
+            {confirmLabel}
           </button>
         </div>
       </div>

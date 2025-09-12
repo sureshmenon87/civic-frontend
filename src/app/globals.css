@@ -50,3 +50,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ensure leaflet controls are below modal */
+.leaflet-container .leaflet-control {
+  z-index: 1000 !important;
+}
+/* in case some plugin pushes higher, keep modal > 10000 */
+.leaflet-container {
+  z-index: 0;
+}
+
+/* image modal backdrop fix (if using custom modal) */
+.image-modal-backdrop {
+  z-index: 99999;
+}
+
+/* optional: prevent image being overlayed by leaflet controls when modal open */
+body.modal-open .leaflet-container {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* small card tweaks */
+.card-no-underline a {
+  text-decoration: none;
+}

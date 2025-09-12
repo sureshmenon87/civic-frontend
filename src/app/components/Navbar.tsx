@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
+import Avatar from "./Avatar";
 
 export default function Navbar() {
   const { user, login, logout } = useAuth();
@@ -57,17 +58,7 @@ export default function Navbar() {
             >
               Create
             </Link>
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt="avatar"
-                className="w-8 h-8 rounded-full"
-              />
-            ) : (
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs">
-                {(user.name || "U").charAt(0)}
-              </div>
-            )}
+            <Avatar src={user.avatar} name={user.name} size={36} proxy={true} />
             <button onClick={doLogout} className="px-3 py-1 border rounded">
               Logout
             </button>
