@@ -6,6 +6,7 @@ import ImageModal from "./ImageModal";
 import Avatar from "./Avatar";
 import { FaTrashAlt, FaCommentAlt } from "react-icons/fa";
 import { useAuth } from "./AuthProvider";
+import { MessageSquare, Heart, Eye } from "lucide-react";
 
 export default function ReportCard({
   report,
@@ -98,10 +99,20 @@ export default function ReportCard({
           </div>
 
           {/* footer: comment count, etc */}
-          <div className="mt-3 flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <FaCommentAlt className="text-gray-500" />
-              <span>{report.commentsCount ?? 0}</span>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-600">
+              From {report.reporterName || "Anonymous"}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500 ml-auto">
+              <span className="flex items-center gap-2">
+                <MessageSquare /> {report.commentsCount || 0}
+              </span>
+              <span className="flex items-center gap-2">
+                <Heart /> {report.likes || 0}
+              </span>
+              <span className="flex items-center gap-2">
+                <Eye /> {report.views || 0}
+              </span>
             </div>
           </div>
         </div>

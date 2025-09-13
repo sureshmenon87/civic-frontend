@@ -3,6 +3,7 @@ import "./globals.css";
 import React from "react";
 import { AuthProvider } from "./components/AuthProvider";
 import Navbar from "./components/Navbar";
+import { ThemeProvider } from "next-themes";
 
 export const metadata = {
   title: "Civic Violation",
@@ -20,7 +21,15 @@ export default function RootLayout({
         <AuthProvider>
           <div className="max-w-6xl mx-auto p-6">
             <Navbar />
-            <main>{children}</main>
+            <main>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem
+              >
+                {children}
+              </ThemeProvider>
+            </main>
           </div>
         </AuthProvider>
       </body>

@@ -7,7 +7,11 @@ import Protected from "@/app/components/Protected";
 import CategorySelect from "@/app/components/CategorySelect";
 import { useAuth } from "@/app/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
-import LocationPicker from "@/app/components/LocationPicker";
+import dynamic from "next/dynamic";
+const LocationPicker = dynamic(
+  () => import("../../components/LocationPicker"),
+  { ssr: false }
+);
 
 export default function CreateReportPageWrapper() {
   // wrap with Protected so only authenticated users can access
@@ -29,14 +33,18 @@ function CreateReportPage() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [coords, setCoords] = useState<[number, number] | null>([77.59, 12.97]); // [lng, lat] default
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
+    if (!coords) {
+      setError("Location (lng/lat) is required");
+      return;
+    }
     // basic client-side validation
     if (!title.trim()) return setError("Title is required");
-    if (!lng || !lat) return setError("Location (lng/lat) is required");
+
     if (!categories || categories.length === 0)
       return setError("Please select at least one category");
 
@@ -46,8 +54,8 @@ function CreateReportPage() {
       // simple scalar fields
       fd.append("title", title.trim());
       fd.append("description", description.trim());
-      fd.append("locationLng", String(lng));
-      fd.append("locationLat", String(lat));
+      fd.append("locationLng", String(coords[0]));
+      fd.append("locationLat", String(coords[1]));
       // categories as JSON string (server should JSON.parse if necessary)
       fd.append("categories", JSON.stringify(categories));
       // file field name must match multer config ("file")

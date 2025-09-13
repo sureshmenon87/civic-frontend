@@ -3,9 +3,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import Avatar from "./Avatar";
+import { useTheme } from "@/lib/useTheme";
 
 export default function Navbar() {
   const { user, login, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -61,6 +63,12 @@ export default function Navbar() {
             <Avatar src={user.avatar} name={user.name} size={36} proxy={true} />
             <button onClick={doLogout} className="px-3 py-1 border rounded">
               Logout
+            </button>
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="px-3 py-1 border rounded"
+            >
+              {theme === "dark" ? "Light" : "Dark"}
             </button>
           </>
         ) : (

@@ -19,6 +19,7 @@ export default function Avatar({
 }: Props) {
   const [ok, setOk] = useState<boolean>(!!src);
   const [url, setUrl] = useState<string | null>(src ?? null);
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
 
   useEffect(() => {
     setOk(!!src);
@@ -28,7 +29,9 @@ export default function Avatar({
   // If the URL is external and you prefer to proxy it through backend to avoid CORS/429,
   // set `proxy=true` and implement backend route /api/v1/avatar/proxy?url=ENCODED_URL
   const finalUrl =
-    proxy && url ? `/api/v1/avatar/proxy?url=${encodeURIComponent(url)}` : url;
+    proxy && url
+      ? `${API_BASE}/api/v1/avatar/proxy?url=${encodeURIComponent(url)}`
+      : url;
 
   const initials =
     (name || "")

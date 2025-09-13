@@ -9,6 +9,7 @@ import ImageModal from "@/app/components/ImageModal";
 import { apiFetch } from "@/lib/api";
 import CommentItem from "@/app/components/CommentItem";
 import ReportBack from "../ReportBack";
+import CommentBox from "@/app/components/CommentBox";
 
 export default function ReportDetailPage() {
   const params = useParams() as { id: string };
@@ -148,6 +149,7 @@ export default function ReportDetailPage() {
           </div>
         </div>
       </div>
+      <CommentBox reportId={report._id} />
 
       <section className="bg-white rounded p-4">
         <h3 className="font-semibold">Comments ({comments.length})</h3>
